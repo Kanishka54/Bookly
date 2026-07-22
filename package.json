@@ -4,9 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "postinstall": "pip install -r requirements.txt",
-    "start": "nodemon app.js"
-  },
+  "start": "node app.js"
+}
   "keywords": [],
   "author": "",
   "license": "ISC",
