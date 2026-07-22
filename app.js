@@ -176,6 +176,7 @@ app.get("/bookdetails", async (req, res) => {
 // Add this route to handle search requests
 app.get("/search", async (req, res) => {
   const user = req.session.user;
+   const showDropdown = !!user;
   const query = req.query.q;
   try {
     const results = await Book.find({
