@@ -8,7 +8,7 @@ const {
   uploadOnCloudinary,
   deleteFromCloudinary,
 } = require("../utils/cloudinary"); // Adjust path as necessary
-const { spawn } = require("child_process");
+
 const User = require("../models/User");
 const fs = require("fs");
 
@@ -43,15 +43,14 @@ router.get("/checkAuthentication", isAuthenticated, (req, res) => {
   res.json({ isAuthenticated: true });
 });
 
-// Route to add a book
 router.post(
   "/addbook",
   isAuthenticated,
   upload.single("image"),
   async (req, res) => {
     const userEmail = req.session.user.email;
+
     try {
-      // Extract book data from the request body and file
       const {
         title,
         author,
@@ -67,22 +66,23 @@ router.post(
 
       const user = req.session.user.name;
       const userphn = req.session.user.phone;
-console.log("req.file =", req.file);
 
-if (!req.file) {
-  return res.status(400).json({
-    success: false,
-    message: "Image not uploaded"
-  });
-}
+      console.log("req.file =", req.file);
 
-const filename = req.file.filename;
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Image not uploaded",
+        });
+      }
 
+      const filename = req.file.filename;
       const filePath = path.join("public", "uploads", filename);
+
       console.log("Uploaded file name:", filename);
 
-      // Upload the image to Cloudinary first
       const cloudinaryResult = await uploadOnCloudinary(filePath);
+
       if (!cloudinaryResult) {
         throw new Error("Failed to upload image to Cloudinary.");
       }
@@ -90,60 +90,39 @@ const filename = req.file.filename;
       const cloudinaryUrl = cloudinaryResult.secure_url;
       console.log("Uploaded file URL:", cloudinaryUrl);
 
-      // Call the Python script to process the image
-      const python = spawn("python", ["./script.py", cloudinaryUrl]);
-
-      // Log output from Python script
-      python.stdout.on("data", (data) => {
-        console.log(`Python stdout: ${data}`);
+      const newBook = new Book({
+        user,
+        title,
+        author,
+        publication_year,
+        description,
+        price,
+        publisher,
+        language,
+        image: cloudinaryUrl,
+        userEmail,
+        quantity,
+        category,
+        condition,
+        userphn,
       });
 
-      python.stderr.on("data", (data) => {
-        console.error(`Python stderr: ${data}`);
+      await newBook.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Book added to the database.",
       });
 
-      python.on("close", async (code) => {
-        if (code !== 0) {
-          console.error("Python script exited with code", code);
-          return res
-            .status(500)
-            .json({ success: false, message: "Internal server error." });
-        }
-
-        // Create a new book object
-        const newBook = new Book({
-          user,
-          title,
-          author,
-          publication_year,
-          description,
-          price,
-          publisher,
-          language,
-          image: cloudinaryUrl, // Save the Cloudinary URL in the database
-          userEmail,
-          quantity,
-          category,
-          condition,
-          userphn,
-        });
-
-        // Save the book to the database
-        await newBook.save();
-
-        res
-          .status(200)
-          .json({ success: true, message: "Book added to the database." });
-      });
     } catch (error) {
       console.error("Error:", error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error." });
+      res.status(500).json({
+        success: false,
+        message: "Internal server error.",
+      });
     }
   }
 );
-
 // Route to get all book details
 router.get("/Books", async (req, res) => {
   try {
