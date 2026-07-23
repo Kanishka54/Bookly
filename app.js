@@ -226,6 +226,7 @@ app.get("/userprofile", (req, res) => {
     // const user = await User.findById(id)
     .then((user) => {
       if (user) {
+        console.log("Profile Pic:", user.profilePic);
         res.render("userprofile", { user });
       } else {
         res.status(404).send("User not found");

@@ -107,13 +107,15 @@
         <h1>User Profile</h1>
 
         <div class="user-details">
-          <img
-            class="profile-pic"
-            src="<%= user.profilePic %>"
-            alt="Profile Picture"
-          />
-          <!-- <img src="<%= user.profilePic %>" alt="Profile Picture"> -->
-
+          
+<% if (user.profilePic) { %>
+    <img
+        class="profile-pic"
+        src="<%= user.profilePic %>"
+        alt="Profile Picture">
+<% } else { %>
+    <p>No profile picture uploaded.</p>
+<% } %>
           <form
             id="uploadProfilePic"
             action="/books/upload-profile-pic"
