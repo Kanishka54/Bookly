@@ -14,6 +14,7 @@ const multer = require("multer");
 const server = http.createServer(app);
 const io = socketIO(server);
 const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
 
 const Rating = require("./models/Ratings");
@@ -422,6 +423,32 @@ app.post("/create-order", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Unable to create order",
+    });
+  }
+});
+app.post("/verify-payment", (req, res) => {
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = req.body;
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body.toString())
+    .digest("hex");
+
+  if (expectedSignature === razorpay_signature) {
+    return res.json({
+      success: true,
+      message: "Payment Verified Successfully",
+    });
+  } else {
+    return res.status(400).json({
+      success: false,
+      message: "Payment Verification Failed",
     });
   }
 });
