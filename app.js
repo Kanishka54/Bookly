@@ -13,11 +13,17 @@ const bcrypt = require("bcrypt");
 const multer = require("multer");
 const server = http.createServer(app);
 const io = socketIO(server);
+const Razorpay = require("razorpay");
+
 
 const Rating = require("./models/Ratings");
 const User = require("./models/User");
 require("dotenv").config();
 // Database connection setup
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 const mongoUri = process.env.MONGO_URI_PRODUCTION;
 // const mongoUri = process.env.MONGO_URI_LOCAL;
 
@@ -396,6 +402,27 @@ app.post("/submit-rating-review", async (req, res) => {
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/create-order", async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const options = {
+      amount: amount * 100, // Convert ₹ to paise
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json(order);
+  } catch (error) {
+    console.error("Razorpay Order Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Unable to create order",
+    });
   }
 });
 // Start the server
