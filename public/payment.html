@@ -109,10 +109,23 @@
         },
       });
 
-      document.getElementById("checkout-button").onclick = function (e) {
-        razorpay.open();
-        e.preventDefault();
-      };
+     document.getElementById("checkout-button").onclick = async function (e) {
+  e.preventDefault();
+
+  const response = await fetch("/create-order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount: total,
+    }),
+  });
+
+  const order = await response.json();
+
+  console.log(order);
+};
     </script>
   </body>
 </html>
