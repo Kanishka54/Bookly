@@ -453,6 +453,9 @@ app.post("/verify-payment", (req, res) => {
     });
   }
 });
+app.get("/orders", (req, res) => {
+    res.render("orders");
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
