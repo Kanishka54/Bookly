@@ -7,6 +7,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const port = 3000;
 const path = require("path");
 const Book = require("./models/Book");
+const Order = require("./models/Order");
 const socketIO = require("socket.io");
 const http = require("http");
 const bcrypt = require("bcrypt");
