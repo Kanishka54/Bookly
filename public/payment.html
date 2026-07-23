@@ -86,30 +86,7 @@
   var logoPath = getParameterByName("logo");
 
 
-      var razorpay = new Razorpay({
-        key: "rzp_test_paJFn0saN0ICxG",
-        amount: total * 100,
-        name: "Book Bazaar",
-        description: "Purchase Description",
-        image: logoPath,
-        handler: function (response) {
-          alert(response.razorpay_payment_id);
-
-          window.location.href = "/";
-        },
-        prefill: {
-          name: "Customer Name",
-          email: "customer@example.com",
-        },
-        notes: {
-          address: "Customer Address",
-        },
-        theme: {
-          color: "#3498db",
-        },
-      });
-
-     document.getElementById("checkout-button").onclick = async function (e) {
+document.getElementById("checkout-button").onclick = async function (e) {
   e.preventDefault();
 
   const response = await fetch("/create-order", {
@@ -124,7 +101,33 @@
 
   const order = await response.json();
 
-  console.log(order);
+  var options = {
+    key:"rzp_test_TGouqvhAK9yYZE",
+    amount: order.amount,
+    currency: order.currency,
+    order_id: order.id,
+
+    name: "Book Bazaar",
+    description: "Purchase Description",
+    image: logoPath,
+
+    handler: function (response) {
+      console.log(response);
+      alert("Payment Successful");
+    },
+
+    prefill: {
+      name: "Customer Name",
+      email: "customer@example.com",
+    },
+
+    theme: {
+      color: "#3498db",
+    },
+  };
+
+  const razorpay = new Razorpay(options);
+  razorpay.open();
 };
     </script>
   </body>
